@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
@@ -33,7 +34,9 @@ public class DashboardManager {
         initializePowerUsage();
     }
 
-    public static ClassPathXmlApplicationContext getDashboardContext() { return (ClassPathXmlApplicationContext) DashboardManager.context; }
+    public static ClassPathXmlApplicationContext getDashboardContext() {
+        return (ClassPathXmlApplicationContext) DashboardManager.context;
+    }
 
     static void setDashboardStatus(String key, String value) {
         String v = (value != null ? value : "");
@@ -47,6 +50,9 @@ public class DashboardManager {
     private void initializeView() {
         DashboardManager.setDashboardStatus("softwareBuild", "undetermined");
         // Subscribe to our tech support channel
+        AbstractSubscribableChannel techSupportChannel = (DirectChannel) DashboardManager.getDashboardContext()
+                .getBean("techSupportChannel");
+        techSupportChannel.subscribe(new ViewMessageHandler());
     }
 
     private void initializeTechSupport() {
@@ -62,7 +68,9 @@ public class DashboardManager {
                 .build();
 
         // Now, to send our message, we need a channel!
-        //AbstractSubscribableChannel techSupportChannel =
+        AbstractSubscribableChannel techSupportChannel = (DirectChannel) DashboardManager.getDashboardContext()
+                .getBean("techSupportChannel");
+        techSupportChannel.send(message);
     }
 
     private void initializeGridStatus() {
@@ -71,7 +79,7 @@ public class DashboardManager {
     private void initializeKinetecoNews() {
     }
 
-    private void initializePowerUsage()  {
+    private void initializePowerUsage() {
     }
 
     private static class ViewMessageHandler extends TechSupportMessageHandler {

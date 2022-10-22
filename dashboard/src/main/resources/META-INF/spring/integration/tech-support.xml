@@ -9,6 +9,6 @@
 			   https://www.springframework.org/schema/integration/spring-integration.xsd" >
 
     <!-- Configure Spring Integration Tech Support message flow here -->
-
+    <int:channel id="techSupportChannel" />
 </beans:beans>
 
