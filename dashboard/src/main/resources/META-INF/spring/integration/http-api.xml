@@ -12,5 +12,24 @@
                http://www.springframework.org/schema/integration/http/spring-integration-http-5.2.xsd">
 
     <!-- Configure Spring Integration HTTP message flow here -->
+    <int:channel id="pollingSignalChannel" />
+
+    <int:inbound-channel-adapter id="apiPoller"
+                                      channel="pollingSignalChannel"
+                                      expression="''"
+                                      auto-startup="false">
+        <int:poller fixed-rate="3000" />
+    </int:inbound-channel-adapter>
+
+<!--    outbound gateway is for client side, so in this case we are consuming REST -->
+    <int-http:outbound-gateway id="apiGateway"
+                               reply-channel="apiInputChannel"
+                               reply-timeout="5000"
+                               expected-response-type="java.lang.String"
+                               url="http://localhost:9090/api"
+                               http-method="GET"
+                               request-channel="pollingSignalChannel" />
+
+
 
 </beans:beans>
