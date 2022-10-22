@@ -29,6 +29,8 @@ public class TechSupportService {
          *  Hint: To subscribe, use ViewService.java:37 as an example. Let your handler be an instance of local inner class ServiceMessageHandler
          */
         // Challenge code here
+        techSupportChannel = (PublishSubscribeChannel) DashboardManager.getDashboardContext()
+                .getBean("techSupportChannel");
 
         // Initialize our updateNotificationChannel
         updateNotificationChannel = (QueueChannel) DashboardManager.getDashboardContext().getBean("updateNotificationQueueChannel");
@@ -47,7 +49,7 @@ public class TechSupportService {
     private void checkVersionCurrency() {
 
         // Check REST api for more current software version
-
+        techSupportChannel.subscribe(new ServiceMessageHandler());
         if (false) {
             updateNotificationChannel.send(MessageBuilder.withPayload("New software version available.").build(), 1000);
         }
