@@ -7,7 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.channel.*;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
-
+import org.springframework.messaging.PollableChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 
 import java.util.Timer;
@@ -20,9 +21,12 @@ public class TechSupportService {
 
     // TODO - refactor to use Spring Dependency Injection
     private AbstractSubscribableChannel techSupportChannel;
+    private PollableChannel updateNotificationChannel;
 
     public TechSupportService() {
-         this.start();
+        updateNotificationChannel = (PollableChannel) DashboardManager.getDashboardContext()
+                .getBean("updateNotificationQueueChannel");
+        this.start();
     }
 
     private void start() {
@@ -38,7 +42,7 @@ public class TechSupportService {
         // Check REST api for more current software version
 
         // For now, following results in a fake notice to the queue every 10 seconds
-
+        updateNotificationChannel.send(MessageBuilder.withPayload("Application update required").build(), 1000L);
     }
 
     private static class ServiceMessageHandler extends TechSupportMessageHandler {
