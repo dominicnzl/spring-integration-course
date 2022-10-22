@@ -31,6 +31,7 @@ public class TechSupportService {
         // Challenge code here
         techSupportChannel = (PublishSubscribeChannel) DashboardManager.getDashboardContext()
                 .getBean("techSupportChannel");
+        techSupportChannel.subscribe(new ServiceMessageHandler());
 
         // Initialize our updateNotificationChannel
         updateNotificationChannel = (QueueChannel) DashboardManager.getDashboardContext().getBean("updateNotificationQueueChannel");
@@ -49,7 +50,6 @@ public class TechSupportService {
     private void checkVersionCurrency() {
 
         // Check REST api for more current software version
-        techSupportChannel.subscribe(new ServiceMessageHandler());
         if (false) {
             updateNotificationChannel.send(MessageBuilder.withPayload("New software version available.").build(), 1000);
         }
