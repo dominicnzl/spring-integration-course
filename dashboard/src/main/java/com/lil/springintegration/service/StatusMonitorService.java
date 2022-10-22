@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.channel.*;
 import org.springframework.integration.support.MessageBuilder;
+import org.springframework.integration.transformer.Transformer;
 
 import java.util.Date;
 import java.util.Random;
@@ -26,9 +27,11 @@ public class StatusMonitorService {
     // TODO - refactor to use Spring Dependency Injection
     private AbstractSubscribableChannel statusMonitorChannel;
     private QueueChannel updateNotificationQueueChannel;
+    private DirectChannel apiInputChannel;
 
     public StatusMonitorService() {
         updateNotificationQueueChannel = (QueueChannel) DashboardManager.getDashboardContext().getBean("updateNotificationQueueChannel");
+        apiInputChannel = (DirectChannel) DashboardManager.getDashboardContext().getBean("rawApiJsonChannel");
         statusMonitorChannel = (PublishSubscribeChannel) DashboardManager.getDashboardContext().getBean("statusMonitorChannel");
         statusMonitorChannel.subscribe(new ServiceMessageHandler());
         this.start();
@@ -47,13 +50,11 @@ public class StatusMonitorService {
         /* Query REST api for client status markers */
 
         // Create our payload domain object from simulated API return value
-        AppSupportStatus thisStatus = new AppSupportStatus();
-        thisStatus.setRunningVersion(currentLocalStatus.getRunningVersion());
-        thisStatus.setTime(new Date());
-        thisStatus.setIsUpdateRequired(true);
+        String rawJson = simulateRestApiCall();
+        System.out.println("rawJson = " + rawJson);
 
         // Send this message to the status monitor channel instead of directly to the queue
-        statusMonitorChannel.send(MessageBuilder.withPayload(thisStatus).build());
+        apiInputChannel.send(MessageBuilder.withPayload(rawJson).build());
 
     }
 
